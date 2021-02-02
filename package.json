@@ -2,13 +2,19 @@
   "name": "star-wars",
   "private": true,
   "scripts": {
+    "build": "nuxt build",
     "commit": "git-cz",
-    "lint": "eslint --ext .js,.vue --ignore-path .eslintignore --fix ."
+    "dev": "nuxt",
+    "lint": "eslint --ext .js,.vue --ignore-path .eslintignore --fix .",
+    "start": "nuxt start"
   },
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "nuxt": "^2.14.12"
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
