@@ -1,0 +1,24 @@
+{
+  "editor.tabSize": 2,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "eslint.packageManager": "yarn",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "html",
+    "vue"
+  ],
+  "files.exclude": {
+    "**/.cache": true,
+    "**/.eslintcache": true,
+    "**/.nuxt": true,
+    "**/.yarn-integrity": true,
+    "**/dist": true,
+    "**/node_modules": true,
+    "**/yarn-debug.log": true,
+    "**/yarn-error.log": true
+  },
+  "vetur.completion.tagCasing": "initial",
+}
