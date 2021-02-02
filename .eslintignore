@@ -152,3 +152,5 @@ dist/
 yarn-error.log
 
 # End of https://www.toptal.com/developers/gitignore/api/node,vue,vuejs,nuxt,nuxtjs
+
+data/
