@@ -154,3 +154,5 @@ yarn-error.log
 # End of https://www.toptal.com/developers/gitignore/api/node,vue,vuejs,nuxt,nuxtjs
 
 data/
+static/images/people/
+static/images/planets/

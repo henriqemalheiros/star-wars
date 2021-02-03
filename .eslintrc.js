@@ -17,6 +17,11 @@ module.exports = {
     'vue',
   ],
   rules: {
+    'global-require': 'off',
+    'max-len': 'off',
+    'no-await-in-loop': 'off',
+    'no-restricted-syntax': 'off',
+    'object-curly-newline': 'off',
     'vue/html-closing-bracket-spacing': ['error', {
       startTag: 'never',
       endTag: 'never',

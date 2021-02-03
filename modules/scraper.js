@@ -1,19 +1,27 @@
-/* eslint-disable global-require, import/no-extraneous-dependencies */
+/* eslint-disable import/no-extraneous-dependencies, import/no-unresolved */
 
 import fetch from 'cross-fetch';
-import { escape } from 'querystring';
-import pick from 'lodash.pick';
 import fs from 'fs-extra';
+import kebabcase from 'lodash.kebabcase';
+import { getExtension, getType } from 'mime';
 import path from 'path';
+import { escape } from 'querystring';
+import sharp from 'sharp';
 
 const metascraper = require('metascraper')([require('metascraper-description')(), require('metascraper-image')()]);
 const logger = require('consola').withScope('nuxt:scrapper');
 
+sharp.cache(false);
+
+const PEOPLE_IMAGES_PATH = path.resolve(__dirname, '../static/images/people');
 const PEOPLE_JSON_PATH = path.resolve(__dirname, '../data/people.json');
 const PLANETS_JSON_PATH = path.resolve(__dirname, '../data/planets.json');
+const PLANETS_IMAGES_PATH = path.resolve(__dirname, '../static/images/planets');
 
 const SWAPI_URL = 'https://swapi.dev/api/';
 const WOOKIEEPEDIA_SEARCH_API_URL = 'https://starwars.fandom.com/api.php?action=opensearch&limit=1&search=';
+
+const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
 
 const fetchJson = async (url) => (await fetch(url)).json();
 const fetchHTML = async (url) => (await fetch(url)).text();
@@ -46,12 +54,7 @@ const getWookieepediaMetadata = async (resource) => {
 };
 
 async function scrape() {
-  await Promise.all([
-    fs.remove(PEOPLE_JSON_PATH),
-    fs.remove(PLANETS_JSON_PATH),
-  ]);
-
-  logger.info('Scraping SWAPI');
+  logger.info('Scraping SWAPI data');
 
   const [
     { count: peopleCount, results: peopleFirstResults },
@@ -89,7 +92,7 @@ async function scrape() {
     throw new Error('Something went wrong while scraping SWAPI');
   }
 
-  logger.info('Scraping Wookieepedia');
+  logger.info('Scraping Wookieepedia data');
 
   const [
     peopleWithArticle,
@@ -107,48 +110,93 @@ async function scrape() {
     Promise.all(planetsWithArticle.map(getWookieepediaMetadata)),
   ]);
 
-  const peopleNormalized = peopleWithMetadata.map((person, index) => ({
-    id: index + 1,
-    ...pick(person, [
-      'name',
-      'image',
-      'description',
-      'article',
-      'height',
-      'mass',
-    ]),
-    homeworld: getSwapiIdFromUrl(person.homeworld),
-    ...pick(person, [
-      'created',
-      'edited',
-    ]),
-  }));
+  const peopleNormalized = peopleWithMetadata.map((person, index) => {
+    const slug = kebabcase(person.name);
 
-  const planetsNormalized = planetsWithMetadata.map((planet, index) => ({
-    id: index + 1,
-    ...pick(planet, [
-      'name',
-      'image',
-      'description',
-      'article',
-      'diameter',
-      'climate',
-      'population',
-    ]),
-    residents: planet.residents.map(getSwapiIdFromUrl),
-  }));
+    const originalImage = person.image.replace(/^(.+?)\/revision(?:.+?)$/, '$1').trim();
+    const resizedImage = `/images/people/${slug}.${getExtension(getType(originalImage))}`;
 
-  await Promise.all([
-    fs.ensureFile(PEOPLE_JSON_PATH),
-    fs.ensureFile(PLANETS_JSON_PATH),
-  ]);
+    return {
+      id: index + 1,
+      slug,
+      name: person.name,
+      images: {
+        original: originalImage,
+        resized: resizedImage,
+      },
+      description: person.description,
+      article: person.article,
+      height: person.height,
+      mass: person.mass,
+      homeworld: getSwapiIdFromUrl(person.homeworld),
+      created: person.created,
+      edited: person.edited,
+    };
+  });
+
+  const planetsNormalized = planetsWithMetadata.map((planet, index) => {
+    const slug = kebabcase(planet.name);
+
+    const originalImage = planet.image.replace(/^(.+?)\/revision(?:.+?)$/, '$1').trim();
+    const resizedImage = `/images/planets/${slug}.${getExtension(getType(originalImage))}`;
+
+    return {
+      id: index + 1,
+      slug,
+      name: planet.name,
+      images: {
+        original: originalImage,
+        resized: resizedImage,
+      },
+      description: planet.description,
+      article: planet.article,
+      diameter: planet.diameter,
+      climate: planet.climate,
+      population: planet.population,
+      residents: planet.residents.map(getSwapiIdFromUrl),
+    };
+  });
 
   await Promise.all([
     fs.writeFile(PEOPLE_JSON_PATH, JSON.stringify(peopleNormalized, null, 2)),
     fs.writeFile(PLANETS_JSON_PATH, JSON.stringify(planetsNormalized, null, 2)),
   ]);
+}
 
-  logger.success('Scraper done');
+async function download() {
+  logger.info('Scraping Wookieepedia images');
+
+  const people = require('../data/people.json');
+  const planets = require('../data/planets.json');
+
+  const images = [
+    ...people.map(({ images: { original, resized } }) => ({ mode: 'person', original, resized })),
+    ...planets.map(({ images: { original, resized } }) => ({ mode: 'planet', original, resized })),
+  ];
+
+  for (const imagesChunk of chunk(images, 10)) {
+    await Promise.all(imagesChunk.map(async ({ mode, original, resized }) => {
+      const { body: readStream } = await fetch(original);
+
+      const resizeStream = sharp().rotate().resize(192, 192, {
+        fit: 'cover',
+        position: mode === 'person' ? 'top' : 'center',
+      });
+
+      const writeStream = fs.createWriteStream(
+        path.resolve(
+          mode === 'person' ? PEOPLE_IMAGES_PATH : PLANETS_IMAGES_PATH,
+          resized.replace(/^(?:.*)\/(.*?)$/, '$1'),
+        ),
+      );
+
+      await new Promise((resolve, reject) => {
+        writeStream.on('error', reject).on('finish', resolve);
+        resizeStream.on('error', reject);
+        readStream.pipe(resizeStream).pipe(writeStream);
+      });
+    }));
+  }
 }
 
 export default function scraper() {
@@ -156,15 +204,39 @@ export default function scraper() {
     const [
       peopleJsonExists,
       planetsJsonExists,
+      peopleImagesExists,
+      planetsImagesExists,
     ] = await Promise.all([
       fs.exists(PEOPLE_JSON_PATH),
       fs.exists(PLANETS_JSON_PATH),
+      fs.exists(PEOPLE_IMAGES_PATH),
+      fs.exists(PLANETS_IMAGES_PATH),
     ]);
 
-    if (!this.nuxt.options.dev || !(peopleJsonExists && planetsJsonExists)) {
-      await scrape();
+    if (this.nuxt.options.dev && peopleJsonExists && planetsJsonExists && peopleImagesExists && planetsImagesExists) {
+      logger.info('Skipping scraper');
+      return;
     }
 
-    this.nuxt.callHook('scraper:done');
+    logger.info('Initiating scraper');
+
+    await Promise.all([
+      fs.remove(PEOPLE_IMAGES_PATH),
+      fs.remove(PEOPLE_JSON_PATH),
+      fs.remove(PLANETS_IMAGES_PATH),
+      fs.remove(PLANETS_JSON_PATH),
+    ]);
+
+    await Promise.all([
+      fs.ensureDir(PEOPLE_IMAGES_PATH),
+      fs.ensureFile(PEOPLE_JSON_PATH),
+      fs.ensureDir(PLANETS_IMAGES_PATH),
+      fs.ensureFile(PLANETS_JSON_PATH),
+    ]);
+
+    await scrape();
+    await download();
+
+    logger.success('Scraper done');
   });
 }
