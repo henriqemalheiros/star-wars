@@ -45,110 +45,126 @@ const getWookieepediaMetadata = async (resource) => {
   };
 };
 
+async function scrape() {
+  await Promise.all([
+    fs.remove(PEOPLE_JSON_PATH),
+    fs.remove(PLANETS_JSON_PATH),
+  ]);
+
+  logger.info('Scraping SWAPI');
+
+  const [
+    { count: peopleCount, results: peopleFirstResults },
+    { count: planetsCount, results: planetsFirstResults },
+  ] = await Promise.all([
+    getSwapiPeoplePage(1),
+    getSwapiPlanetsPage(1),
+  ]);
+
+  const peoplePageCount = Math.ceil(peopleCount / peopleFirstResults.length);
+  const planetsPageCount = Math.ceil(planetsCount / planetsFirstResults.length);
+
+  const peopleRemainingPages = [...Array(peoplePageCount - 1).keys()].map((i) => i + 2);
+  const planetsRemainingPages = [...Array(planetsPageCount - 1).keys()].map((i) => i + 2);
+
+  const [
+    peopleRemainingResults,
+    planetsRemainingResults,
+  ] = await Promise.all([
+    Promise.all(peopleRemainingPages.map(getSwapiPeoplePage)),
+    Promise.all(planetsRemainingPages.map(getSwapiPlanetsPage)),
+  ]);
+
+  const people = [
+    ...peopleFirstResults,
+    ...peopleRemainingResults.reduce((acc, { results }) => [...acc, ...results], []),
+  ];
+
+  const planets = [
+    ...planetsFirstResults,
+    ...planetsRemainingResults.reduce((acc, { results }) => [...acc, ...results], []),
+  ];
+
+  if (peopleCount !== people.length || planetsCount !== planets.length) {
+    throw new Error('Something went wrong while scraping SWAPI');
+  }
+
+  logger.info('Scraping Wookieepedia');
+
+  const [
+    peopleWithArticle,
+    planetsWithArticle,
+  ] = await Promise.all([
+    Promise.all(people.map(getWookieepediaArticle)),
+    Promise.all(planets.map(getWookieepediaArticle)),
+  ]);
+
+  const [
+    peopleWithMetadata,
+    planetsWithMetadata,
+  ] = await Promise.all([
+    Promise.all(peopleWithArticle.map(getWookieepediaMetadata)),
+    Promise.all(planetsWithArticle.map(getWookieepediaMetadata)),
+  ]);
+
+  const peopleNormalized = peopleWithMetadata.map((person, index) => ({
+    id: index + 1,
+    ...pick(person, [
+      'name',
+      'image',
+      'description',
+      'article',
+      'height',
+      'mass',
+    ]),
+    homeworld: getSwapiIdFromUrl(person.homeworld),
+    ...pick(person, [
+      'created',
+      'edited',
+    ]),
+  }));
+
+  const planetsNormalized = planetsWithMetadata.map((planet, index) => ({
+    id: index + 1,
+    ...pick(planet, [
+      'name',
+      'image',
+      'description',
+      'article',
+      'diameter',
+      'climate',
+      'population',
+    ]),
+    residents: planet.residents.map(getSwapiIdFromUrl),
+  }));
+
+  await Promise.all([
+    fs.ensureFile(PEOPLE_JSON_PATH),
+    fs.ensureFile(PLANETS_JSON_PATH),
+  ]);
+
+  await Promise.all([
+    fs.writeFile(PEOPLE_JSON_PATH, JSON.stringify(peopleNormalized, null, 2)),
+    fs.writeFile(PLANETS_JSON_PATH, JSON.stringify(planetsNormalized, null, 2)),
+  ]);
+
+  logger.success('Scraper done');
+}
+
 export default function scraper() {
   this.nuxt.hook('build:before', async () => {
-    await Promise.all([
-      fs.remove(PEOPLE_JSON_PATH),
-      fs.remove(PLANETS_JSON_PATH),
-    ]);
-
-    logger.info('Scraping SWAPI');
-
     const [
-      { count: peopleCount, results: peopleFirstResults },
-      { count: planetsCount, results: planetsFirstResults },
+      peopleJsonExists,
+      planetsJsonExists,
     ] = await Promise.all([
-      getSwapiPeoplePage(1),
-      getSwapiPlanetsPage(1),
+      fs.exists(PEOPLE_JSON_PATH),
+      fs.exists(PLANETS_JSON_PATH),
     ]);
 
-    const peoplePageCount = Math.ceil(peopleCount / peopleFirstResults.length);
-    const planetsPageCount = Math.ceil(planetsCount / planetsFirstResults.length);
-
-    const peopleRemainingPages = [...Array(peoplePageCount - 1).keys()].map((i) => i + 2);
-    const planetsRemainingPages = [...Array(planetsPageCount - 1).keys()].map((i) => i + 2);
-
-    const [
-      peopleRemainingResults,
-      planetsRemainingResults,
-    ] = await Promise.all([
-      Promise.all(peopleRemainingPages.map(getSwapiPeoplePage)),
-      Promise.all(planetsRemainingPages.map(getSwapiPlanetsPage)),
-    ]);
-
-    const people = [
-      ...peopleFirstResults,
-      ...peopleRemainingResults.reduce((acc, { results }) => [...acc, ...results], []),
-    ];
-
-    const planets = [
-      ...planetsFirstResults,
-      ...planetsRemainingResults.reduce((acc, { results }) => [...acc, ...results], []),
-    ];
-
-    if (peopleCount !== people.length || planetsCount !== planets.length) {
-      throw new Error('Something went wrong while scraping SWAPI');
+    if (!this.nuxt.options.dev || !(peopleJsonExists && planetsJsonExists)) {
+      await scrape();
     }
 
-    logger.info('Scraping Wookieepedia');
-
-    const [
-      peopleWithArticle,
-      planetsWithArticle,
-    ] = await Promise.all([
-      Promise.all(people.map(getWookieepediaArticle)),
-      Promise.all(planets.map(getWookieepediaArticle)),
-    ]);
-
-    const [
-      peopleWithMetadata,
-      planetsWithMetadata,
-    ] = await Promise.all([
-      Promise.all(peopleWithArticle.map(getWookieepediaMetadata)),
-      Promise.all(planetsWithArticle.map(getWookieepediaMetadata)),
-    ]);
-
-    const peopleNormalized = peopleWithMetadata.map((person, index) => ({
-      id: index + 1,
-      ...pick(person, [
-        'name',
-        'image',
-        'description',
-        'article',
-        'height',
-        'mass',
-      ]),
-      homeworld: getSwapiIdFromUrl(person.homeworld),
-      ...pick(person, [
-        'created',
-        'edited',
-      ]),
-    }));
-
-    const planetsNormalized = planetsWithMetadata.map((planet, index) => ({
-      id: index + 1,
-      ...pick(planet, [
-        'name',
-        'image',
-        'description',
-        'article',
-        'diameter',
-        'climate',
-        'population',
-      ]),
-      residents: planet.residents.map(getSwapiIdFromUrl),
-    }));
-
-    await Promise.all([
-      fs.ensureFile(PEOPLE_JSON_PATH),
-      fs.ensureFile(PLANETS_JSON_PATH),
-    ]);
-
-    await Promise.all([
-      fs.writeFile(PEOPLE_JSON_PATH, JSON.stringify(peopleNormalized, null, 2)),
-      fs.writeFile(PLANETS_JSON_PATH, JSON.stringify(planetsNormalized, null, 2)),
-    ]);
-
-    logger.success('Scraped data saved');
+    this.nuxt.callHook('scraper:done');
   });
 }
