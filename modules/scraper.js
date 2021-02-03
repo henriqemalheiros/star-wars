@@ -1,4 +1,4 @@
-/* eslint-disable import/no-extraneous-dependencies, import/no-unresolved */
+/* eslint-disable import/no-extraneous-dependencies */
 
 import fetch from 'cross-fetch';
 import fs from 'fs-extra';

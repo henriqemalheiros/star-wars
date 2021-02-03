@@ -18,6 +18,8 @@ module.exports = {
   ],
   rules: {
     'global-require': 'off',
+    'import/extensions': 'off',
+    'import/no-unresolved': 'off',
     'max-len': 'off',
     'no-await-in-loop': 'off',
     'no-restricted-syntax': 'off',
