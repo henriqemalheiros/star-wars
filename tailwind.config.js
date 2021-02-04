@@ -20,6 +20,9 @@ module.exports = {
       black: colors.black,
       white: colors.white,
       gray: colors.trueGray,
+      yellow: {
+        DEFAULT: '#FFE81F',
+      },
     },
     screens: {
       xxs: '360px',
