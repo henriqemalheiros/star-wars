@@ -1,5 +1,5 @@
 export default (value) => (
   typeof value === 'string'
-  && value.length
-  && value !== 'unknown'
+  && value.trim().length
+  && value.trim().toLowerCase() !== 'unknown'
 );

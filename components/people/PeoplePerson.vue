@@ -39,7 +39,7 @@
       </div>
       <div
         v-if="person.info"
-        class="text-xxs xs:text-xs text-gray-500 xs:text-gray-600"
+        class="text-center text-xxs xs:text-xs text-gray-500 xs:text-gray-600"
       >
         {{ person.info }}
       </div>
