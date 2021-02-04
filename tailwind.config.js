@@ -29,5 +29,10 @@ module.exports = {
       lg: '1024px',
       xl: '1280px',
     },
+    extend: {
+      fontSize: {
+        xxs: '.625rem',
+      },
+    },
   },
 };
