@@ -1,8 +1,14 @@
 <template>
   <div class="w-full overflow-hidden rounded-md bg-gray-900 border border-gray-800 divide-y divide-gray-800">
     <div class="flex justify-between items-center">
-      <div class="text-gray-400">
-        Search
+      <div class="text-gray-400 p-3 flex-grow flex-shrink">
+        <div class="w-1/2">
+          <Input
+            v-model="searchQuery"
+            icon="search"
+            placeholder="Search"
+          />
+        </div>
       </div>
       <div class="flex items-center space-x-4 p-3">
         <div class="text-xs uppercase text-gray-400">
@@ -47,12 +53,15 @@
 <script>
 /* eslint-disable no-nested-ternary */
 
+import Fuse from 'fuse.js';
+
 import isKnown from '~/utils/is-known';
 import isValidNumber from '~/utils/is-valid-number';
 import stringToNumber from '~/utils/string-to-number';
 import toValidBirthYear from '~/utils/to-valid-birth-year';
 import toValidNumber from '~/utils/to-valid-number';
 
+import Input from '~/components/input';
 import Select from '~/components/select';
 
 import PeoplePerson from './PeoplePerson.vue';
@@ -88,8 +97,9 @@ const SORT_OPTIONS = [
 export default {
   name: 'People',
   components: {
-    Select,
+    Input,
     PeoplePerson,
+    Select,
   },
   props: {
     people: {
@@ -106,6 +116,7 @@ export default {
       orderBy: ORDER_OPTIONS[0].value,
       page: 1,
       sortBy: SORT_OPTIONS[0].value,
+      searchQuery: '',
     };
   },
   computed: {
@@ -116,10 +127,47 @@ export default {
         SORT_FUNCTIONS[this.sortBy](personA[this.sortBy], personB[this.sortBy]) * (this.orderBy === 'desc' ? 1 : -1)
       ));
     },
+    searchedPeople() {
+      if (!this.searchQuery.length) {
+        return this.sortedPeople;
+      }
+
+      this.$fuse.setCollection(this.sortedPeople);
+
+      return this.$fuse.search(this.searchQuery).map((result) => {
+        const { indices = [], value } = result.matches.find(({ key: matchKey }) => matchKey === 'name') || {};
+
+        return {
+          ...result.item,
+          nameHighlighted: [...indices, undefined].reduce(({ chunks, nextUnhighlightedIndex }, pair, pairIndex, pairs) => ({
+            chunks: [
+              ...chunks,
+              ...(
+                pairIndex < (pairs.length - 1)
+                  ? [
+                    [value.substring(nextUnhighlightedIndex, pair[0]), false],
+                    [value.substring(pair[0], pair[1] + 1), true],
+                  ]
+                  : [
+                    [value.substring(nextUnhighlightedIndex, value.length), false],
+                  ]
+              ),
+            ],
+            nextUnhighlightedIndex: pairIndex < (pairs.length - 1)
+              ? pair[1] + 1
+              : -1,
+          }), { chunks: [], nextUnhighlightedIndex: 0 }).chunks.filter(([string]) => (
+            typeof string === 'string'
+            && string.length
+          )),
+        };
+      });
+    },
     normalizedPeople() {
-      return [...this.sortedPeople].splice(0, PEOPLE_PER_PAGE * this.page).map((person) => ({
+      return [...this.searchedPeople].splice(0, PEOPLE_PER_PAGE * this.page).map((person) => ({
         id: person.id,
         name: person.name,
+        nameHighlighted: person.nameHighlighted,
         image: person.images.resized,
         info: [
           isKnown(person.birthYear) ? `${person.birthYear}` : undefined,
@@ -133,10 +181,16 @@ export default {
       }));
     },
     canLoadMore() {
-      return (PEOPLE_PER_PAGE * this.page) < this.sortedPeople.length;
+      return (PEOPLE_PER_PAGE * this.page) < this.searchedPeople.length;
     },
   },
   created() {
+    this.$fuse = new Fuse([], {
+      includeMatches: true,
+      keys: ['name'],
+      threshold: 0.2,
+    });
+
     this.ORDER_OPTIONS = ORDER_OPTIONS;
     this.SORT_OPTIONS = SORT_OPTIONS;
   },

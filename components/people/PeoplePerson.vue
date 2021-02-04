@@ -13,7 +13,17 @@
     </div>
     <div class="flex flex-col items-center space-y-1 xs:space-y-2">
       <div
-        v-if="person.name"
+        v-if="person.nameHighlighted"
+        class="text-center xs:text-lg"
+      >
+        <span
+          v-for="([chunk, isHighlighted], chunkIndex) of person.nameHighlighted"
+          :key="chunkIndex"
+          :class="isHighlighted ? 'text-yellow font-bold' : ''"
+        >{{ chunk }}</span>
+      </div>
+      <div
+        v-else-if="person.name"
         class="text-center xs:text-lg"
       >
         {{ person.name }}
