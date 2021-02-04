@@ -68,8 +68,8 @@ import Select from '~/components/select';
 import PeoplePerson from './PeoplePerson.vue';
 
 const ORDER_OPTIONS = [
-  { label: 'Descending', value: 'desc' },
   { label: 'Ascending', value: 'asc' },
+  { label: 'Descending', value: 'desc' },
 ];
 
 const PEOPLE_PER_PAGE = 12;
@@ -78,7 +78,7 @@ const SORT_FUNCTIONS = {
   birthYear: (birthYearA, birthYearB) => (toValidBirthYear(birthYearB) - toValidBirthYear(birthYearA)),
   height: (heightA, heightB) => (toValidNumber(stringToNumber(heightB)) - toValidNumber(stringToNumber(heightA))),
   mass: (massA, massB) => (toValidNumber(stringToNumber(massB)) - toValidNumber(stringToNumber(massA))),
-  slug: (slugA, slugB) => (slugA > slugB ? 1 : (slugA < slugB ? -1 : 0)),
+  slug: (slugA, slugB) => (slugA < slugB ? 1 : (slugA > slugB ? -1 : 0)),
 };
 
 const SORT_FILTERS = {
