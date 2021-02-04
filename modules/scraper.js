@@ -8,6 +8,8 @@ import path from 'path';
 import { escape } from 'querystring';
 import sharp from 'sharp';
 
+import isKnown from '../utils/is-known';
+
 const metascraper = require('metascraper')([require('metascraper-description')(), require('metascraper-image')()]);
 const logger = require('consola').withScope('nuxt:scrapper');
 
@@ -116,6 +118,8 @@ async function scrape() {
     const originalImage = person.image.replace(/^(.+?)\/revision(?:.+?)$/, '$1').trim();
     const resizedImage = `/images/people/${slug}.${getExtension(getType(originalImage))}`;
 
+    const homeworld = getSwapiIdFromUrl(person.homeworld);
+
     return {
       id: index + 1,
       slug,
@@ -124,18 +128,18 @@ async function scrape() {
         original: originalImage,
         resized: resizedImage,
       },
-      description: person.description,
-      article: person.article,
-      birthYear: person.birth_year,
-      height: person.height,
-      mass: person.mass,
-      homeworld: getSwapiIdFromUrl(person.homeworld),
+      ...(isKnown(person.description) && { description: person.description }),
+      ...(isKnown(person.article) && { article: person.article }),
+      ...(isKnown(person.birth_year) && { birthYear: person.birth_year }),
+      ...(isKnown(person.height) && { height: person.height }),
+      ...(isKnown(person.mass) && { mass: person.mass }),
+      ...(planetsWithMetadata[homeworld - 1].name.toLowerCase() !== 'unknown' && { homeworld }),
       created: person.created,
       edited: person.edited,
     };
   });
 
-  const planetsNormalized = planetsWithMetadata.map((planet, index) => {
+  const planetsNormalized = planetsWithMetadata.filter(({ name }) => name.toLowerCase() !== 'unknown').map((planet, index) => {
     const slug = kebabcase(planet.name);
 
     const originalImage = planet.image.replace(/^(.+?)\/revision(?:.+?)$/, '$1').trim();
@@ -149,12 +153,14 @@ async function scrape() {
         original: originalImage,
         resized: resizedImage,
       },
-      description: planet.description,
-      article: planet.article,
-      diameter: planet.diameter,
-      climate: planet.climate,
-      population: planet.population,
+      ...(isKnown(planet.description) && { description: planet.description }),
+      ...(isKnown(planet.article) && { article: planet.article }),
+      ...(isKnown(planet.diameter) && { diameter: planet.diameter }),
+      ...(isKnown(planet.climate) && { climate: planet.climate }),
+      ...(isKnown(planet.population) && { population: planet.population }),
       residents: planet.residents.map(getSwapiIdFromUrl),
+      created: planet.created,
+      edited: planet.edited,
     };
   });
 
