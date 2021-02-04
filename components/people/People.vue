@@ -36,6 +36,7 @@
       >
         <PeoplePerson
           :person="person"
+          @click="$emit('click', person.id)"
         />
       </div>
     </div>

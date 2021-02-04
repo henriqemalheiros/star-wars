@@ -1,5 +1,8 @@
 <template>
-  <div class="flex flex-col items-center px-6 py-5 space-y-2 xs:space-y-3">
+  <button
+    class="w-full h-full flex flex-col justify-center items-center px-6 py-5 space-y-2 xs:space-y-3 hover:bg-gray-800 hover:bg-opacity-50 focus:outline-none"
+    @click="$emit('click')"
+  >
     <InfoSummary
       :image="(person.images || {}).resized"
       :misc="misc"
@@ -16,12 +19,10 @@
         <InfoRibbon
           :image="(planet.images || {}).resized"
           :label="planet.name"
-          is-clickable
-          @click="onPlanetClick"
         />
       </div>
     </InfoSummary>
-  </div>
+  </button>
 </template>
 
 <script>
@@ -57,11 +58,6 @@ export default {
     },
     planet() {
       return this.getPlanet(this.person.homeworld);
-    },
-  },
-  methods: {
-    onPlanetClick() {
-      console.log(`Planet clicked: ${this.planet.id}`);
     },
   },
 };
