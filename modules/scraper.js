@@ -126,6 +126,7 @@ async function scrape() {
       },
       description: person.description,
       article: person.article,
+      birthYear: person.birth_year,
       height: person.height,
       mass: person.mass,
       homeworld: getSwapiIdFromUrl(person.homeworld),
