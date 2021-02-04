@@ -25,9 +25,19 @@ export default {
     Header,
     People,
   },
+  provide() {
+    return {
+      getPlanet: this.getPlanet,
+    };
+  },
   created() {
     this.PEOPLE = people;
     this.PLANETS = planets;
+  },
+  methods: {
+    getPlanet(planetId) {
+      return this.PLANETS.find((planet) => planet.id === planetId);
+    },
   },
 };
 </script>
