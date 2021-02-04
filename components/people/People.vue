@@ -30,7 +30,7 @@
     </div>
     <div class="grid grid-cols-1 xxs:grid-cols-2 sm:grid-cols-3 gap-px">
       <div
-        v-for="person of normalizedPeople"
+        v-for="person of paginatedPeople"
         :key="person.id"
         class="ring-1 ring-gray-800"
       >
@@ -139,7 +139,7 @@ export default {
 
         return {
           ...result.item,
-          nameHighlighted: [...indices, undefined].reduce(({ chunks, nextUnhighlightedIndex }, pair, pairIndex, pairs) => ({
+          nameWithHighlights: [...indices, undefined].reduce(({ chunks, nextUnhighlightedIndex }, pair, pairIndex, pairs) => ({
             chunks: [
               ...chunks,
               ...(
@@ -163,22 +163,8 @@ export default {
         };
       });
     },
-    normalizedPeople() {
-      return [...this.searchedPeople].splice(0, PEOPLE_PER_PAGE * this.page).map((person) => ({
-        id: person.id,
-        name: person.name,
-        nameHighlighted: person.nameHighlighted,
-        image: person.images.resized,
-        info: [
-          isKnown(person.birthYear) ? `${person.birthYear}` : undefined,
-          isKnown(person.height) ? `${person.height}cm` : undefined,
-          isKnown(person.mass) ? `${person.mass}kg` : undefined,
-        ].filter(Boolean).join(' · '),
-        homeworld: {
-          name: this.planets[person.homeworld - 1].name,
-          image: this.planets[person.homeworld - 1].images.resized,
-        },
-      }));
+    paginatedPeople() {
+      return [...this.searchedPeople].splice(0, PEOPLE_PER_PAGE * this.page);
     },
     canLoadMore() {
       return (PEOPLE_PER_PAGE * this.page) < this.searchedPeople.length;
