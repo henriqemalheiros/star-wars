@@ -25,6 +25,8 @@
         leave-active-class="transition duration-300"
         leave-class="opacity-100"
         mode="out-in"
+        @before-enter="onModalTransitionEnter"
+        @after-leave="onModalTransitionLeave"
       >
         <component
           :is="currentModal.type === 'person' ? 'ModalCardPerson' : 'ModalCardPlanet'"
@@ -50,6 +52,8 @@
 </template>
 
 <script>
+import { clearAllBodyScrollLocks, disableBodyScroll, enableBodyScroll } from 'body-scroll-lock';
+
 import Header from '~/components/header';
 import ModalCardPerson from '~/components/modal-card-person';
 import ModalCardPlanet from '~/components/modal-card-planet';
@@ -136,6 +140,22 @@ export default {
               : this.getPlanet(id),
           });
         });
+      }
+    },
+    onModalTransitionEnter(el) {
+      const target = el.querySelector('[scroll-lock-target]');
+
+      if (target) {
+        disableBodyScroll(target, { reserveScrollBarGap: true });
+      }
+    },
+    onModalTransitionLeave(el) {
+      const target = el.querySelector('[scroll-lock-target]');
+
+      if (target) {
+        enableBodyScroll(target);
+      } else {
+        clearAllBodyScrollLocks();
       }
     },
   },

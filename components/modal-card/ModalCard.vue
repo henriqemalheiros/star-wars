@@ -23,7 +23,10 @@
           </button>
         </div>
       </div>
-      <div class="max-h-full overflow-auto">
+      <div
+        class="max-h-full overflow-auto"
+        scroll-lock-target
+      >
         <slot/>
       </div>
     </div>
