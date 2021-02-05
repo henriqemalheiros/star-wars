@@ -35,7 +35,7 @@ const ICONS = {
 };
 
 export default {
-  name: 'Input',
+  name: 'FieldText',
   components: {
     IconXCircle,
   },

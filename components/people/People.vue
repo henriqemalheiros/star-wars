@@ -3,7 +3,7 @@
     <div class="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center">
       <div class="text-gray-400 pt-0 sm:pt-3 p-3 flex-grow flex-shrink">
         <div class="w-full sm:w-2/3 md:w-1/2">
-          <Input
+          <FieldText
             v-model="searchQuery"
             icon="search"
             placeholder="Search"
@@ -56,7 +56,7 @@ import stringToNumber from '~/utils/string-to-number';
 import toValidBirthYear from '~/utils/to-valid-birth-year';
 import toValidNumber from '~/utils/to-valid-number';
 
-import Input from '~/components/input';
+import FieldText from '~/components/field-text';
 import Select from '~/components/select';
 
 import PeoplePerson from './PeoplePerson.vue';
@@ -92,7 +92,7 @@ const SORT_OPTIONS = [
 export default {
   name: 'People',
   components: {
-    Input,
+    FieldText,
     PeoplePerson,
     Select,
   },
