@@ -29,7 +29,7 @@ const fetchJson = async (url) => (await fetch(url)).json();
 const fetchHTML = async (url) => (await fetch(url)).text();
 const fetchMetadata = async (url) => metascraper({ html: (await fetchHTML(url)), url });
 
-const getSwapiIdFromUrl = (url) => Number(url.replace(/^(?:.*?)(\d+)\/?$/, '$1'));
+const getSwapiIdFromUrl = (url) => Number(url.split('/').map((c) => c.trim()).filter(Boolean).pop());
 const getSwapiPage = (resource) => async (page = 1) => fetchJson(`${SWAPI_URL}${resource}?page=${page}`);
 const getSwapiPeoplePage = getSwapiPage('people');
 const getSwapiPlanetsPage = getSwapiPage('planets');
@@ -112,7 +112,7 @@ async function scrape() {
     Promise.all(planetsWithArticle.map(getWookieepediaMetadata)),
   ]);
 
-  const peopleNormalized = peopleWithMetadata.map((person, index) => {
+  const peopleNormalized = peopleWithMetadata.map((person) => {
     const slug = kebabcase(person.name);
 
     const originalImage = person.image.replace(/^(.+?)\/revision(?:.+?)$/, '$1').trim();
@@ -121,7 +121,7 @@ async function scrape() {
     const homeworld = getSwapiIdFromUrl(person.homeworld);
 
     return {
-      id: index + 1,
+      id: getSwapiIdFromUrl(person.url),
       slug,
       name: person.name,
       images: {
@@ -139,14 +139,14 @@ async function scrape() {
     };
   });
 
-  const planetsNormalized = planetsWithMetadata.filter(({ name }) => name.toLowerCase() !== 'unknown').map((planet, index) => {
+  const planetsNormalized = planetsWithMetadata.filter(({ name }) => name.toLowerCase() !== 'unknown').map((planet) => {
     const slug = kebabcase(planet.name);
 
     const originalImage = planet.image.replace(/^(.+?)\/revision(?:.+?)$/, '$1').trim();
     const resizedImage = `/images/planets/${slug}.${getExtension(getType(originalImage))}`;
 
     return {
-      id: index + 1,
+      id: getSwapiIdFromUrl(planet.url),
       slug,
       name: planet.name,
       images: {
