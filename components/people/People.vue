@@ -11,9 +11,6 @@
         </div>
       </div>
       <div class="flex justify-end items-center space-x-4 p-3">
-        <div class="hidden xs:block text-xs uppercase text-gray-400">
-          Sort by
-        </div>
         <div>
           <Select
             v-model="sortBy"
@@ -87,7 +84,7 @@ const SORT_FILTERS = {
 
 const SORT_OPTIONS = [
   { label: 'Name', value: 'slug' },
-  { label: 'Age', value: 'birthYear' },
+  { label: 'Birth year', value: 'birthYear' },
   { label: 'Height', value: 'height' },
   { label: 'Mass', value: 'mass' },
 ];
@@ -126,12 +123,6 @@ export default {
       ));
     },
     searchedPeople() {
-      if (!this.searchQuery.length) {
-        return this.sortedPeople;
-      }
-
-      this.$fuse.setCollection(this.sortedPeople);
-
       return this.$fuse.search(this.searchQuery).map((result) => {
         const { indices = [], value } = result.matches.find(({ key: matchKey }) => matchKey === 'name') || {};
 
@@ -161,15 +152,23 @@ export default {
         };
       });
     },
+    normalizedPeople() {
+      return this.searchQuery.length ? this.searchedPeople : this.sortedPeople;
+    },
     paginatedPeople() {
-      return [...this.searchedPeople].splice(0, PEOPLE_PER_PAGE * this.page);
+      return [...this.normalizedPeople].splice(0, PEOPLE_PER_PAGE * this.page);
     },
     canLoadMore() {
-      return (PEOPLE_PER_PAGE * this.page) < this.searchedPeople.length;
+      return (PEOPLE_PER_PAGE * this.page) < this.normalizedPeople.length;
+    },
+  },
+  watch: {
+    people(people) {
+      this.$fuse.setCollection(people);
     },
   },
   created() {
-    this.$fuse = new Fuse([], {
+    this.$fuse = new Fuse(this.people, {
       includeMatches: true,
       keys: ['name'],
       threshold: 0.2,

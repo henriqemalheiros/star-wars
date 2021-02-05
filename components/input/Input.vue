@@ -11,16 +11,24 @@
     </span>
     <input
       v-model="innerValue"
-      :class="iconComponent ? 'pl-8 pr-3' : 'px-3'"
+      :class="iconComponent ? 'px-8' : 'pl-3 pr-8'"
       :placeholder="placeholder"
       class="w-full appearance-none py-1.5 rounded bg-gray-900 text-sm text-gray-300 focus:text-gray-100 focus:outline-none"
       type="text"
     >
+    <button
+      v-if="innerValue.length"
+      class="absolute top-0 right-0 w-8 h-8 flex justify-center items-center focus:outline-none"
+      @click="clear"
+    >
+      <IconXCircle class="w-5"/>
+    </button>
   </div>
 </template>
 
 <script>
 import IconSearch from './assets/search.svg?inline';
+import IconXCircle from './assets/x-circle.svg?inline';
 
 const ICONS = {
   search: IconSearch,
@@ -28,6 +36,9 @@ const ICONS = {
 
 export default {
   name: 'Input',
+  components: {
+    IconXCircle,
+  },
   model: {
     prop: 'value',
     event: 'input',
@@ -66,6 +77,11 @@ export default {
       if (newValue !== this.innerValue) {
         this.innerValue = newValue;
       }
+    },
+  },
+  methods: {
+    clear() {
+      this.innerValue = '';
     },
   },
 };
