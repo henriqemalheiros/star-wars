@@ -1,21 +1,41 @@
 <template>
   <div class="relative w-full max-w-screen-md mx-auto px-5">
     <ModalContainer
-      v-if="currentModal"
+      :is-active="Boolean(currentModal)"
       @close="modalClose"
     >
-      <ModalOverlay
-        v-if="currentModal"
-        @close="modalClose"
-      />
-      <component
-        :is="currentModal.type === 'person' ? 'ModalCardPerson' : 'ModalCardPlanet'"
-        v-if="currentModal"
-        :data="currentModal.data"
-        :with-back-button="modals.length > 1"
-        @back="modalBack"
-        @close="modalClose"
-      />
+      <transition
+        enter-active-class="transition-opacity duration-400"
+        enter-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-400"
+        leave-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <ModalOverlay
+          v-if="currentModal"
+          @close="modalClose"
+        />
+      </transition>
+      <transition
+        :enter-class="`opacity-0 transform ${modalTransitionEnterClass}`"
+        :leave-to-class="`opacity-0 transform ${modalTransitionLeaveToClass}`"
+        enter-active-class="transition duration-300"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-300"
+        leave-class="opacity-100"
+        mode="out-in"
+      >
+        <component
+          :is="currentModal.type === 'person' ? 'ModalCardPerson' : 'ModalCardPlanet'"
+          v-if="currentModal"
+          :key="`${currentModal.type}-${currentModal.data.id}`"
+          :data="currentModal.data"
+          :with-back-button="modals.length > 1"
+          @back="modalBack"
+          @close="modalClose"
+        />
+      </transition>
     </ModalContainer>
     <div class="relative z-0">
       <Header/>
@@ -60,11 +80,15 @@ export default {
   data() {
     return {
       modals: [],
+      modalTransitionEnterClass: 'translate-y-4',
+      modalTransitionLeaveToClass: 'translate-y-4',
     };
   },
   computed: {
     currentModal() {
-      return this.modals.length ? this.modals[this.modals.length - 1] : undefined;
+      return this.modals.length
+        ? this.modals[this.modals.length - 1]
+        : undefined;
     },
   },
   created() {
@@ -79,14 +103,39 @@ export default {
       return this.PLANETS.find((planet) => planet.id === planetId);
     },
     modalBack() {
-      this.modals.pop();
+      this.modalTransitionEnterClass = '-translate-x-4';
+      this.modalTransitionLeaveToClass = 'translate-x-4';
+
+      this.$nextTick(() => {
+        this.modals.pop();
+      });
     },
     modalClose() {
-      this.modals = [];
+      this.modalTransitionEnterClass = 'translate-y-6';
+      this.modalTransitionLeaveToClass = 'translate-y-6';
+
+      this.$nextTick(() => {
+        this.modals = [];
+      });
     },
     modalOpen({ type, id }) {
       if (['person', 'planet'].includes(type)) {
-        this.modals.push({ type, data: type === 'person' ? this.getPerson(id) : this.getPlanet(id) });
+        if (this.modals.length) {
+          this.modalTransitionEnterClass = 'translate-x-4';
+          this.modalTransitionLeaveToClass = '-translate-x-4';
+        } else {
+          this.modalTransitionEnterClass = 'translate-y-6';
+          this.modalTransitionLeaveToClass = 'translate-y-6';
+        }
+
+        this.$nextTick(() => {
+          this.modals.push({
+            type,
+            data: type === 'person'
+              ? this.getPerson(id)
+              : this.getPlanet(id),
+          });
+        });
       }
     },
   },
