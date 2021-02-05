@@ -19,6 +19,8 @@
         <InfoRibbon
           :image="(planet.images || {}).resized"
           :label="planet.name"
+          is-clickable
+          @click="onPlanetClick"
         />
       </div>
     </InfoSummary>
@@ -59,6 +61,12 @@ export default {
     },
     planet() {
       return this.getPlanet(this.person.homeworld);
+    },
+  },
+  methods: {
+    onPlanetClick(event) {
+      event.stopImmediatePropagation();
+      this.modalOpen({ type: 'planet', id: this.planet.id });
     },
   },
 };
