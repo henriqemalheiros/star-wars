@@ -17,6 +17,7 @@
     "@tailwindcss/aspect-ratio": "^0.2.0",
     "dayjs": "^1.10.4",
     "fuse.js": "^6.4.6",
+    "numeral": "^2.0.6",
     "nuxt": "^2.14.12"
   },
   "devDependencies": {
