@@ -1,52 +1,54 @@
 <template>
-  <div class="relative w-full max-w-screen-md mx-auto px-3 sm:px-5 pb-3 sm:pb-5">
-    <ModalContainer
-      :is-active="Boolean(currentModal)"
-      @close="modalClose"
-    >
-      <transition
-        enter-active-class="transition-opacity duration-400"
-        enter-class="opacity-0"
-        enter-to-class="opacity-100"
-        leave-active-class="transition-opacity duration-400"
-        leave-class="opacity-100"
-        leave-to-class="opacity-0"
+  <div class="w-full overflow-x-hidden">
+    <div class="relative w-full max-w-screen-md mx-auto px-3 sm:px-5 pb-3 sm:pb-5">
+      <ModalContainer
+        :is-active="Boolean(currentModal)"
+        @close="modalClose"
       >
-        <ModalOverlay
-          v-if="currentModal"
-          @close="modalClose"
+        <transition
+          enter-active-class="transition-opacity duration-400"
+          enter-class="opacity-0"
+          enter-to-class="opacity-100"
+          leave-active-class="transition-opacity duration-400"
+          leave-class="opacity-100"
+          leave-to-class="opacity-0"
+        >
+          <ModalOverlay
+            v-if="currentModal"
+            @close="modalClose"
+          />
+        </transition>
+        <transition
+          :enter-class="`opacity-0 transform ${modalTransitionEnterClass}`"
+          :leave-to-class="`opacity-0 transform ${modalTransitionLeaveToClass}`"
+          enter-active-class="transition duration-300"
+          enter-to-class="opacity-100"
+          leave-active-class="transition duration-300"
+          leave-class="opacity-100"
+          mode="out-in"
+          @before-enter="onModalTransitionEnter"
+          @after-leave="onModalTransitionLeave"
+        >
+          <component
+            :is="currentModal.type === 'person' ? 'ModalCardPerson' : 'ModalCardPlanet'"
+            v-if="currentModal"
+            :key="`${currentModal.type}-${currentModal.data.id}`"
+            :data="currentModal.data"
+            :with-back-button="modals.length > 1"
+            @back="modalBack"
+            @close="modalClose"
+          />
+        </transition>
+      </ModalContainer>
+      <div class="relative z-0">
+        <Header/>
+      </div>
+      <div class="relative z-10">
+        <People
+          :people="PEOPLE"
+          :planets="PLANETS"
         />
-      </transition>
-      <transition
-        :enter-class="`opacity-0 transform ${modalTransitionEnterClass}`"
-        :leave-to-class="`opacity-0 transform ${modalTransitionLeaveToClass}`"
-        enter-active-class="transition duration-300"
-        enter-to-class="opacity-100"
-        leave-active-class="transition duration-300"
-        leave-class="opacity-100"
-        mode="out-in"
-        @before-enter="onModalTransitionEnter"
-        @after-leave="onModalTransitionLeave"
-      >
-        <component
-          :is="currentModal.type === 'person' ? 'ModalCardPerson' : 'ModalCardPlanet'"
-          v-if="currentModal"
-          :key="`${currentModal.type}-${currentModal.data.id}`"
-          :data="currentModal.data"
-          :with-back-button="modals.length > 1"
-          @back="modalBack"
-          @close="modalClose"
-        />
-      </transition>
-    </ModalContainer>
-    <div class="relative z-0">
-      <Header/>
-    </div>
-    <div class="relative z-10">
-      <People
-        :people="PEOPLE"
-        :planets="PLANETS"
-      />
+      </div>
     </div>
   </div>
 </template>

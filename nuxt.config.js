@@ -8,7 +8,6 @@ export default {
     htmlAttrs: {
       lang: 'en',
       class: [
-        'overflow-x-hidden',
         'w-full',
         'h-full',
         'antialiased',
