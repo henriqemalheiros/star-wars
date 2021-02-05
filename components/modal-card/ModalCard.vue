@@ -5,7 +5,7 @@
         <div class="w-12 h-12 flex-grow-0 flex-shrink-0">
           <button
             v-if="withBackButton"
-            class="block text-white p-3.5 text-gray-500"
+            class="block text-white p-3.5 text-gray-500 focus:outline-none"
             @click="$emit('back')"
           >
             <IconArrowLeft class="w-5 h-5"/>
@@ -16,7 +16,7 @@
         </div>
         <div class="w-12 h-12 flex-grow-0 flex-shrink-0">
           <button
-            class="block text-white p-3.5 text-gray-500"
+            class="block text-white p-3.5 text-gray-500 focus:outline-none"
             @click="$emit('close')"
           >
             <IconX class="w-5 h-5"/>

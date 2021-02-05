@@ -1,6 +1,6 @@
 <template>
   <ModalCard
-    title="Character info"
+    title="Planet info"
     :with-back-button="withBackButton"
     @back="$emit('back')"
     @close="$emit('close')"
@@ -13,22 +13,7 @@
           :name="data.name"
           is-horizontal
           is-large
-        >
-          <div
-            v-if="planet"
-            class="flex items-center space-x-1.5"
-          >
-            <span class="text-sm xs:text-base text-gray-400">
-              from
-            </span>
-            <InfoRibbon
-              :image="(planet.images || {}).resized"
-              :label="planet.name"
-              is-clickable
-              @click="onPlanetClick"
-            />
-          </div>
-        </InfoSummary>
+        />
       </div>
       <div
         v-if="data.description && data.article"
@@ -41,30 +26,33 @@
       </div>
       <div class="border-t border-gray-800 divide-y divide-gray-800">
         <InfoData
-          v-if="formattedBithYear"
-          label="Birth year"
-          :value="formattedBithYear"
+          v-if="formattedDiameter"
+          label="Diameter"
+          :value="formattedDiameter"
         />
         <InfoData
-          v-if="formattedHeight"
-          label="Height"
-          :value="formattedHeight"
+          v-if="formattedPopulation"
+          label="Population"
+          :value="formattedPopulation"
         />
         <InfoData
-          v-if="formattedMass"
-          label="Mass"
-          :value="formattedMass"
-        />
-        <InfoData
-          v-if="planet"
-          label="Homeworld"
+          v-if="resolvedResidents.length"
+          label="Residents"
         >
-          <InfoRibbon
-            :image="(planet.images || {}).resized"
-            :label="planet.name"
-            is-clickable
-            @click="onPlanetClick"
-          />
+          <div class="flex flex-wrap -mr-1.5 -mb-1.5">
+            <div
+              v-for="resident of resolvedResidents"
+              :key="resident.id"
+              class="mr-1.5 mb-1.5"
+            >
+              <InfoRibbon
+                :image="(resident.images || {}).resized"
+                :label="resident.name"
+                is-clickable
+                @click="onPersonClick(resident.id)"
+              />
+            </div>
+          </div>
         </InfoData>
         <InfoData
           v-if="formattedCreatedAt"
@@ -82,10 +70,9 @@
 </template>
 
 <script>
-import formatBithYear from '~/utils/format-birth-year';
 import formatDate from '~/utils/format-date';
-import formatHeight from '~/utils/format-height';
-import formatMass from '~/utils/format-mass';
+import formatDiameter from '~/utils/format-diameter';
+import formatPopulation from '~/utils/format-population';
 
 import InfoData from '../info-data';
 import InfoDescription from '../info-description';
@@ -94,7 +81,7 @@ import InfoSummary from '../info-summary';
 import ModalCard from '../modal-card';
 
 export default {
-  name: 'ModalCardPerson',
+  name: 'ModalCardPlanet',
   components: {
     InfoData,
     InfoDescription,
@@ -103,7 +90,7 @@ export default {
     ModalCard,
   },
   inject: [
-    'getPlanet',
+    'getPerson',
     'modalOpen',
   ],
   props: {
@@ -117,35 +104,35 @@ export default {
     },
   },
   computed: {
-    formattedBithYear() {
-      return formatBithYear(this.data.birthYear);
-    },
     formattedCreatedAt() {
       return formatDate(this.data.created);
     },
-    formattedHeight() {
-      return formatHeight(this.data.height);
+    formattedDiameter() {
+      return formatDiameter(this.data.population);
     },
-    formattedMass() {
-      return formatMass(this.data.mass);
+    formattedPopulation() {
+      return formatPopulation(this.data.diameter);
     },
     formattedUpdatedAt() {
       return formatDate(this.data.edited);
     },
     misc() {
       return [
-        this.formattedBithYear,
-        this.formattedHeight,
-        this.formattedMass,
+        this.formattedDiameter,
+        this.formattedPopulation,
       ];
     },
-    planet() {
-      return this.getPlanet(this.data.homeworld);
+    resolvedResidents() {
+      return this.data.residents.map(this.getPerson).map(({ id, images, name }) => ({
+        id,
+        images,
+        name,
+      }));
     },
   },
   methods: {
-    onPlanetClick() {
-      this.modalOpen({ type: 'planet', id: this.planet.id });
+    onPersonClick(personId) {
+      this.modalOpen({ type: 'person', id: personId });
     },
   },
 };

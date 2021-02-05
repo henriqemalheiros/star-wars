@@ -34,10 +34,7 @@
         :key="person.id"
         class="ring-1 ring-gray-800"
       >
-        <PeoplePerson
-          :person="person"
-          @click="$emit('click', person.id)"
-        />
+        <PeoplePerson :person="person"/>
       </div>
     </div>
     <div v-if="canLoadMore">

@@ -1,7 +1,7 @@
 <template>
   <button
     class="w-full h-full flex flex-col justify-center items-center px-6 py-5 space-y-2 xs:space-y-3 hover:bg-gray-800 hover:bg-opacity-50 focus:outline-none"
-    @click="$emit('click')"
+    @click="modalOpen({ type: 'person', id: person.id })"
   >
     <InfoSummary
       :image="(person.images || {}).resized"
@@ -41,6 +41,7 @@ export default {
   },
   inject: [
     'getPlanet',
+    'modalOpen',
   ],
   props: {
     person: {

@@ -1,17 +1,20 @@
 <template>
   <div class="relative w-full max-w-screen-md mx-auto px-5">
     <ModalContainer
-      v-if="selectedPerson"
-      @close="onModalClose"
+      v-if="currentModal"
+      @close="modalClose"
     >
       <ModalOverlay
-        v-if="selectedPerson"
-        @close="onModalClose"
+        v-if="currentModal"
+        @close="modalClose"
       />
-      <ModalCardPerson
-        v-if="selectedPerson"
-        :person="selectedPerson"
-        @close="onModalClose"
+      <component
+        :is="currentModal.type === 'person' ? 'ModalCardPerson' : 'ModalCardPlanet'"
+        v-if="currentModal"
+        :data="currentModal.data"
+        :with-back-button="modals.length > 1"
+        @back="modalBack"
+        @close="modalClose"
       />
     </ModalContainer>
     <div class="relative z-0">
@@ -21,7 +24,6 @@
       <People
         :people="PEOPLE"
         :planets="PLANETS"
-        @click="onPersonClick"
       />
     </div>
   </div>
@@ -30,6 +32,7 @@
 <script>
 import Header from '~/components/header';
 import ModalCardPerson from '~/components/modal-card-person';
+import ModalCardPlanet from '~/components/modal-card-planet';
 import ModalContainer from '~/components/modal-container';
 import ModalOverlay from '~/components/modal-overlay';
 import People from '~/components/people';
@@ -42,35 +45,49 @@ export default {
   components: {
     Header,
     ModalCardPerson,
+    ModalCardPlanet,
     ModalContainer,
     ModalOverlay,
     People,
   },
   provide() {
     return {
+      getPerson: this.getPerson,
       getPlanet: this.getPlanet,
+      modalOpen: this.modalOpen,
     };
   },
   data() {
     return {
-      selectedPerson: undefined,
+      modals: [],
     };
+  },
+  computed: {
+    currentModal() {
+      return this.modals.length ? this.modals[this.modals.length - 1] : undefined;
+    },
   },
   created() {
     this.PEOPLE = people;
     this.PLANETS = planets;
-
-    this.onPersonClick(1);
   },
   methods: {
+    getPerson(personId) {
+      return this.PEOPLE.find((person) => person.id === personId);
+    },
     getPlanet(planetId) {
       return this.PLANETS.find((planet) => planet.id === planetId);
     },
-    onPersonClick(personId) {
-      this.selectedPerson = this.PEOPLE.find((p) => p.id === personId);
+    modalBack() {
+      this.modals.pop();
     },
-    onModalClose() {
-      this.selectedPerson = undefined;
+    modalClose() {
+      this.modals = [];
+    },
+    modalOpen({ type, id }) {
+      if (['person', 'planet'].includes(type)) {
+        this.modals.push({ type, data: type === 'person' ? this.getPerson(id) : this.getPlanet(id) });
+      }
     },
   },
 };
