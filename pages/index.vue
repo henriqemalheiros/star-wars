@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full max-w-screen-md mx-auto px-5 pb-5">
+  <div class="relative w-full max-w-screen-md mx-auto px-3 sm:px-5 pb-3 sm:pb-5">
     <ModalContainer
       :is-active="Boolean(currentModal)"
       @close="modalClose"

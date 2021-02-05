@@ -12,7 +12,7 @@
       width="5"
       height="5"
     >
-    <span class="text-xs xs:text-sm leading-none text-gray-300">
+    <span class="text-xs xs:text-sm leading-none text-gray-300 flex-grow flex-shrink truncate">
       {{ label }}
     </span>
   </component>

@@ -5,7 +5,7 @@
   >
     <div
       v-if="image"
-      class="p-1 bg-gray-800 rounded-full"
+      class="p-1 bg-gray-800 rounded-full flex-grow-0 flex-shrink-0"
     >
       <img
         :src="image"

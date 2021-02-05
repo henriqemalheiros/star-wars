@@ -10,7 +10,7 @@
 <script>
 /* eslint-disable no-param-reassign */
 
-const STARS = 750;
+const STARS = 1500;
 const DEPTH = 1000;
 const DEPTH_SENSITIVITY = 1 / DEPTH;
 

@@ -7,6 +7,19 @@ export default {
     title: 'Star Wars WHOIS',
     htmlAttrs: {
       lang: 'en',
+      class: [
+        'overflow-x-hidden',
+        'w-full',
+        'h-full',
+        'antialiased',
+      ],
+    },
+    bodyAttrs: {
+      class: [
+        'overflow-x-hidden',
+        'w-full',
+        'h-full',
+      ],
     },
     link: [
       {

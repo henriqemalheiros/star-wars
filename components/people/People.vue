@@ -1,7 +1,7 @@
 <template>
   <div class="w-full overflow-hidden rounded-md bg-gray-900 border border-gray-800 divide-y divide-gray-800">
     <div class="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center">
-      <div class="text-gray-400 pt-0 sm:pt-3 p-3 flex-grow flex-shrink">
+      <div class="text-gray-400 pt-0 p-2 sm:pt-3 sm:p-3 flex-grow flex-shrink">
         <div class="w-full sm:w-2/3 md:w-1/2">
           <FieldText
             v-model="searchQuery"
@@ -10,7 +10,7 @@
           />
         </div>
       </div>
-      <div class="flex justify-end items-center space-x-4 p-3">
+      <div class="flex justify-end items-center space-x-4 p-2 sm:p-3">
         <div>
           <FieldSelect
             v-model="sortBy"
