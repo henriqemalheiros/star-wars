@@ -121,10 +121,10 @@ export default {
       return formatDate(this.data.created);
     },
     formattedDiameter() {
-      return formatDiameter(this.data.population);
+      return formatDiameter(this.data.diameter);
     },
     formattedPopulation() {
-      return formatPopulation(this.data.diameter);
+      return formatPopulation(this.data.population);
     },
     formattedUpdatedAt() {
       return formatDate(this.data.edited);
