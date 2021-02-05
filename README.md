@@ -1,8 +1,10 @@
-# Star Wars WHOIS
+<p align="center"><a href="https://star-wars.henriqemalheiros.me/"><img src="https://user-images.githubusercontent.com/23730762/107061215-a8e1a100-67b6-11eb-8f52-39fa03e0191c.png"></a></p>
+
+<p align="center">🚀 <a href="https://star-wars.henriqemalheiros.me/">https://star-wars.henriqemalheiros.me/</a> 🚀</p>
 
 This is a small — but fun — project I built for a job interview. The assignment was to create a one-page application with a list of Star Wars characters and the details about their home planet. The data to build such application should be retrieved using the [Star Wars API (SWAPI)](https://swapi.dev/) and should be able to be sorted by its columns and filtered by searching the character's name.
 
-The assignment mentioned a table with columns, but I could say I'm a bit of a ✨ designer ✨ myself. So I took some liberties to make the application a little less boring, I added pictures and short descriptions from [Wookieepedia](https://starwars.fandom.com/wiki/Main_Page), alongside some ✨ motion ✨.
+The assignment mentioned a table with columns, but I could say I'm a bit of a ✨ designer ✨ myself. So I took some liberties to make the application a little less boring, I added pictures and short descriptions from [Wookieepedia](https://starwars.fandom.com/wiki/Main_Page), alongside some motion.
 
 One other thing worth mentioning is that to make the application faster, all the data and images are collected during build time (the information rarely changes, so this won't be a problem). This way we don't have to deal with API calls and loading screens.
 
