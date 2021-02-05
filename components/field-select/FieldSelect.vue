@@ -22,7 +22,7 @@
 import IconSelector from './assets/selector.svg?inline';
 
 export default {
-  name: 'Select',
+  name: 'FieldSelect',
   components: {
     IconSelector,
   },

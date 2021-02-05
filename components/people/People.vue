@@ -12,13 +12,13 @@
       </div>
       <div class="flex justify-end items-center space-x-4 p-3">
         <div>
-          <Select
+          <FieldSelect
             v-model="sortBy"
             :options="SORT_OPTIONS"
           />
         </div>
         <div>
-          <Select
+          <FieldSelect
             v-model="orderBy"
             :options="ORDER_OPTIONS"
           />
@@ -56,8 +56,8 @@ import stringToNumber from '~/utils/string-to-number';
 import toValidBirthYear from '~/utils/to-valid-birth-year';
 import toValidNumber from '~/utils/to-valid-number';
 
+import FieldSelect from '~/components/field-select';
 import FieldText from '~/components/field-text';
-import Select from '~/components/select';
 
 import PeoplePerson from './PeoplePerson.vue';
 
@@ -92,9 +92,9 @@ const SORT_OPTIONS = [
 export default {
   name: 'People',
   components: {
+    FieldSelect,
     FieldText,
     PeoplePerson,
-    Select,
   },
   props: {
     people: {
