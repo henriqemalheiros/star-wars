@@ -2,7 +2,7 @@
   "name": "star-wars",
   "private": true,
   "scripts": {
-    "build": "nuxt build",
+    "build": "nuxt generate",
     "commit": "git-cz",
     "dev": "nuxt",
     "lint": "eslint --ext .js,.vue --ignore-path .eslintignore --fix .",

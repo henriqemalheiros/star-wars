@@ -112,4 +112,5 @@ export default {
   modules: [
     '@nuxtjs/svg',
   ],
+  target: 'static',
 };
