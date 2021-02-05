@@ -13,7 +13,11 @@
           :name="data.name"
           is-horizontal
           is-large
-        />
+        >
+          <span class="text-sm xs:text-base text-gray-400">
+            {{ formattedClimate }}
+          </span>
+        </InfoSummary>
       </div>
       <div
         v-if="data.description && data.article"
@@ -25,6 +29,11 @@
         />
       </div>
       <div class="border-t border-gray-800 divide-y divide-gray-800">
+        <InfoData
+          v-if="formattedClimate"
+          label="Climate"
+          :value="formattedClimate"
+        />
         <InfoData
           v-if="formattedDiameter"
           label="Diameter"
@@ -70,6 +79,7 @@
 </template>
 
 <script>
+import formatClimate from '~/utils/format-climate';
 import formatDate from '~/utils/format-date';
 import formatDiameter from '~/utils/format-diameter';
 import formatPopulation from '~/utils/format-population';
@@ -104,6 +114,9 @@ export default {
     },
   },
   computed: {
+    formattedClimate() {
+      return formatClimate(this.data.climate);
+    },
     formattedCreatedAt() {
       return formatDate(this.data.created);
     },

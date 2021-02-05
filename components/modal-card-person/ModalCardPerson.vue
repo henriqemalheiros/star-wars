@@ -51,11 +51,6 @@
           :value="formattedHeight"
         />
         <InfoData
-          v-if="formattedMass"
-          label="Mass"
-          :value="formattedMass"
-        />
-        <InfoData
           v-if="planet"
           label="Homeworld"
         >
@@ -66,6 +61,11 @@
             @click="onPlanetClick"
           />
         </InfoData>
+        <InfoData
+          v-if="formattedMass"
+          label="Mass"
+          :value="formattedMass"
+        />
         <InfoData
           v-if="formattedCreatedAt"
           label="Created at"
