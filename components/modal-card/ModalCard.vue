@@ -1,6 +1,6 @@
 <template>
-  <div class="relative z-10 w-full max-w-screen-xs px-5">
-    <div class="rounded-md bg-gray-900 border border-gray-800 divide-y divide-gray-800">
+  <div class="relative flex z-10 w-full max-w-screen-xs max-h-full p-5">
+    <div class="max-h-full flex flex-col rounded-md bg-gray-900 border border-gray-800 divide-y divide-gray-800">
       <div class="flex items-center space-x-4">
         <div class="w-12 h-12 flex-grow-0 flex-shrink-0">
           <button
@@ -23,7 +23,7 @@
           </button>
         </div>
       </div>
-      <div>
+      <div class="max-h-full overflow-auto">
         <slot/>
       </div>
     </div>
