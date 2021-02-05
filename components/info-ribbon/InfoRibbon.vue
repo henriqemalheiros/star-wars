@@ -1,7 +1,7 @@
 <template>
   <component
-    :is="isClickable ? 'button' : 'div'"
-    :class="[image ? 'p-0.5 pr-2' : 'py-0.5 px-2', isClickable ? 'hover:bg-gray-700 focus:outline-none' : undefined]"
+    :is="isClickable ? (isClickable === true ? 'button' : isClickable) : 'div'"
+    :class="[image ? 'p-0.5 pr-2' : 'py-0.5 px-2', isClickable ? 'cursor-pointer hover:bg-gray-700 focus:outline-none' : undefined]"
     class="flex items-center rounded-full bg-gray-800 space-x-1.5"
     @click="isClickable && $emit('click', $event)"
   >
@@ -27,7 +27,7 @@ export default {
       default: undefined,
     },
     isClickable: {
-      type: Boolean,
+      type: [Boolean, String],
       default: false,
     },
     label: {

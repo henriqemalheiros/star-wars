@@ -19,7 +19,7 @@
         <InfoRibbon
           :image="(planet.images || {}).resized"
           :label="planet.name"
-          is-clickable
+          is-clickable="span"
           @click="onPlanetClick"
         />
       </div>
