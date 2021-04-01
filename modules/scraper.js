@@ -198,8 +198,10 @@ async function download() {
       );
 
       await new Promise((resolve, reject) => {
-        writeStream.on('error', reject).on('finish', resolve);
-        resizeStream.on('error', reject);
+        readStream.on('error', reject).on('end', resolve).on('close', resolve);
+        resizeStream.on('error', reject).on('end', resolve).on('close', resolve);
+        writeStream.on('error', reject).on('end', resolve).on('close', resolve);
+
         readStream.pipe(resizeStream).pipe(writeStream);
       });
     }));
